@@ -33,6 +33,7 @@ pub fn process_tweet(
     strip_handles: bool,
     reduce_len: bool,
 ) -> Vec<String> {
+    // https://github.com/nltk/nltk/blob/175929bc47f818b5fbd8475daf831ff748b74170/nltk/tokenize/casual.py
     lazy_static! {
         static ref SEMTIMEN: Vec<Regex> = vec![
             Regex::new(r"\$\w*").unwrap(),                  // stock market tickers like $GE
