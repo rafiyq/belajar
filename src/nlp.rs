@@ -105,14 +105,18 @@ pub fn process_tweet(
 
     let mut tweets_clean :Vec<String>= Vec::new();
     let stopwords_english = stopwords("english");
-    for word in tweet_tokens {
-        if !stopwords_english.iter().any(|i| i == word.to_ascii_lowercase().as_str()) && 
+    for w in tweet_tokens {
+        let mut word = w.to_owned();
+        if !EMOTICONS.is_match(w) {
+            word.make_ascii_lowercase();
+        }
+        if !stopwords_english.iter().any(|i| i == &word) && 
             (word.len() != 1 || !(word.chars().nth(0).unwrap() as u8).is_ascii_punctuation()) {
             //println!("{}", word);
-            if !word.is_ascii() || EMOTICONS.is_match(word){
-                tweets_clean.push(word.to_owned());
+            if word.is_ascii(){
+                tweets_clean.push(stem::get(&word).unwrap());
             } else {
-                tweets_clean.push(stem::get(word).unwrap().to_ascii_lowercase());
+                tweets_clean.push(word)
             }
         }
     }
