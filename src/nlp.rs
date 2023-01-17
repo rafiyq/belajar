@@ -42,8 +42,9 @@ pub fn process_tweet(
             Regex::new(r"#").unwrap(),                      // the hash # sign from the word
         ];
         static ref HANDLES: Vec<fancy_regex::Regex> = vec![ // Twitter username handles from text.
-            fc_regex!(r"(?<![A-Za-z0-9_!@#\$%&*])@"),
-            fc_regex!(r"(([A-Za-z0-9_]){15}(?!@)|([A-Za-z0-9_]){1,14}(?![A-Za-z0-9_]*@))")
+          //  fc_regex!(r"(([A-Za-z0-9_]){16}(?!@)|([A-Za-z0-9_]){1,16}(?![A-Za-z0-9_]*@))"),
+            fc_regex!(r"(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)"),
+
         ];
         static ref REDUCE_LEN: fancy_regex::Regex = fc_regex!(r"(.)\1{2,}");
         static ref HANG_RE: fancy_regex::Regex = fc_regex!(r"([^a-zA-Z0-9])\1{3,}");
@@ -98,20 +99,18 @@ pub fn process_tweet(
     }
     // Shorten problematic sequences of characters
     clean_tweet = HANG_RE.replace(&clean_tweet, "$1$1$1").to_string();
-    println!("{}", clean_tweet);
 
     // Extract tokens from tweet
     let tweet_tokens: Vec<&str> = REGEXPS.find_iter(&clean_tweet).map(|mat| mat.as_str()).collect();
-    println!("{:?}", tweet_tokens);
 
     let mut tweets_clean :Vec<String>= Vec::new();
     let stopwords_english = stopwords("english");
     for word in tweet_tokens {
-    println!("{}", word);
-    if !stopwords_english.iter().any(|i| i==word) && 
-        word.len() > 1 || !(word.chars().nth(0).unwrap() as u8).is_ascii_punctuation() {
-            if EMOTICONS.is_match(word) {
-                tweets_clean.push(stem::get(word).unwrap())
+        if !stopwords_english.iter().any(|i| i == word.to_ascii_lowercase().as_str()) && 
+            (word.len() != 1 || !(word.chars().nth(0).unwrap() as u8).is_ascii_punctuation()) {
+            //println!("{}", word);
+            if !word.is_ascii() || EMOTICONS.is_match(word){
+                tweets_clean.push(word.to_owned());
             } else {
                 tweets_clean.push(stem::get(word).unwrap().to_ascii_lowercase());
             }
