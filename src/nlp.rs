@@ -22,7 +22,7 @@ pub fn read_tweets(path:&str) -> Vec<String> {
     tweets
 }
 /// Process tweet function.
-/// TODO: Make regex expand to multiline!
+/// TODO: make PorterStemmer to behave like ntlk's version. 
 /// Input:
 ///     tweet: a string containing a tweet
 /// Output:
@@ -42,9 +42,9 @@ pub fn process_tweet(
             Regex::new(r"#").unwrap(),                      // the hash # sign from the word
         ];
         static ref HANDLES: Vec<fancy_regex::Regex> = vec![ // Twitter username handles from text.
-          //  fc_regex!(r"(([A-Za-z0-9_]){16}(?!@)|([A-Za-z0-9_]){1,16}(?![A-Za-z0-9_]*@))"),
+            fc_regex!(r"(?<![A-Za-z0-9_!@#\$%&*])@"),
+            fc_regex!(r"(([A-Za-z0-9_]){15}(?!@)|([A-Za-z0-9_]){1,14}(?![A-Za-z0-9_]*@))"),
             fc_regex!(r"(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)"),
-
         ];
         static ref REDUCE_LEN: fancy_regex::Regex = fc_regex!(r"(.)\1{2,}");
         static ref HANG_RE: fancy_regex::Regex = fc_regex!(r"([^a-zA-Z0-9])\1{3,}");
