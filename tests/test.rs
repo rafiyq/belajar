@@ -35,3 +35,9 @@ fn process_tweet_tests_5() {
     let right: Vec<String> = vec![str!("oh"), str!("gosh"), str!("sai"), str!("aw"), str!("hun"), str!(":("), str!("cuddl")];
     assert_eq!(left, right);
 }
+#[test]
+fn process_tweet_tests_6() {
+    let left = process_tweet("No comment aing :(", true, true, true);
+    let right: Vec<String> = vec![str!("comment"), str!("a"), str!(":(")];
+    assert_eq!(left, right);
+}
