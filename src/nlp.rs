@@ -1,8 +1,9 @@
-use std::{fs, collections::HashMap, iter::zip};
+use std::{fmt, fs, collections::HashMap, iter::zip};
 use html_escape::decode_html_entities;
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
+use crate::stem;
 
 macro_rules! fc_regex {
     ($re:expr) => {
@@ -21,6 +22,7 @@ pub fn read_tweets(path:&str) -> Vec<String> {
     }
     tweets
 }
+
 /// Process tweet function.
 /// TODO: make PorterStemmer to behave like ntlk's version. 
 /// Input:
@@ -102,7 +104,6 @@ pub fn process_tweet(
 
     // Extract tokens from tweet
     let tweet_tokens: Vec<&str> = REGEXPS.find_iter(&clean_tweet).map(|mat| mat.as_str()).collect();
-
     let mut tweets_clean :Vec<String>= Vec::new();
     let stopwords_english = stopwords("english");
     for w in tweet_tokens {
@@ -112,12 +113,16 @@ pub fn process_tweet(
         }
         if !stopwords_english.iter().any(|i| i == &word) && 
             (word.len() != 1 || !(word.chars().nth(0).unwrap() as u8).is_ascii_punctuation()) {
-            //println!("{}", word);
-            if word.is_ascii(){
-                tweets_clean.push(stem::get(&word).unwrap());
-            } else {
-                tweets_clean.push(word)
-            }
+            match stem::get(&word) {
+                Ok(s) => tweets_clean.push(s),
+                Err(_) => tweets_clean.push(word),
+            };
+            // if word.is_ascii(){
+            //     tweets_clean.push(stem::get(&word).unwrap());
+            //     println!("alive");
+            // } else {
+            //     tweets_clean.push(word)
+            // }
         }
     }
     tweets_clean
@@ -134,6 +139,12 @@ pub fn stopwords<'life>(lang:&str) -> Vec<String> {
 }
 #[derive(Eq, Hash, PartialEq)]
 pub struct Pair(String, i32);
+impl fmt::Display for Pair {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({:?}, {})", &self.0, &self.1)?;
+        Ok(())
+    }
+}
 /// Build frequencies.
 /// Input:
 ///     tweets: a list of tweets
@@ -145,10 +156,17 @@ pub struct Pair(String, i32);
 pub fn build_freqs(tweets: Vec<String>, labels: Vec<i32>) -> HashMap<Pair, i32> {
     let mut freqs: HashMap<Pair, i32> = HashMap::new();
     for (label, tweet) in zip(labels, tweets) {
-        for word in process_tweet(tweet.as_ref(), true, true, true) {
+        let tokens = process_tweet(tweet.as_ref(), true, true, true);
+        for word in tokens {
             let pair = Pair(word, label);
             freqs.entry(pair).or_insert(1);
         }
     }
     freqs
 }
+
+// pub fn all_tweets() -> Vec<String> {
+//     let path_positive = "datasets/twitter_samples/positive_tweets.json";
+//     let path_negative = "datasets/twitter_samples/negative_tweets.json";
+//     read_tweets(path_positive).append(&mut read_tweets(path_negative))
+// }
