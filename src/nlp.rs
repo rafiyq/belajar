@@ -159,7 +159,7 @@ pub fn build_freqs(tweets: Vec<String>, labels: Vec<i32>) -> HashMap<Pair, i32> 
         let tokens = process_tweet(tweet.as_ref(), true, true, true);
         for word in tokens {
             let pair = Pair(word, label);
-            freqs.entry(pair).or_insert(1);
+            freqs.entry(pair).and_modify(|v| *v += 1).or_insert(1);
         }
     }
     freqs
