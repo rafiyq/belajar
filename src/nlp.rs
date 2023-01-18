@@ -10,6 +10,14 @@ macro_rules! fc_regex {
         ::fancy_regex::Regex::new($re).unwrap()
     };
 }
+#[derive(Eq, Hash, PartialEq)]
+pub struct Pair(String, i32);
+impl fmt::Display for Pair {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({:?}, {})", &self.0, &self.1)?;
+        Ok(())
+    }
+}
 
 pub fn read_tweets(path:&str) -> Vec<String> {
     let mut tweets:Vec<String> = Vec::new();
@@ -22,7 +30,6 @@ pub fn read_tweets(path:&str) -> Vec<String> {
     }
     tweets
 }
-
 /// Process tweet function.
 /// TODO: make PorterStemmer to behave like ntlk's version. 
 /// Input:
@@ -127,7 +134,6 @@ pub fn process_tweet(
     }
     tweets_clean
 }
-
 pub fn stopwords<'life>(lang:&str) -> Vec<String> {
     let path = format!("datasets/twitter_samples/stopwords/{}", lang);
     let mut words:Vec<String> = Vec::new();
@@ -136,14 +142,6 @@ pub fn stopwords<'life>(lang:&str) -> Vec<String> {
         words.push(line.to_owned());
     }
     words
-}
-#[derive(Eq, Hash, PartialEq)]
-pub struct Pair(String, i32);
-impl fmt::Display for Pair {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({:?}, {})", &self.0, &self.1)?;
-        Ok(())
-    }
 }
 /// Build frequencies.
 /// Input:
@@ -164,9 +162,3 @@ pub fn build_freqs(tweets: Vec<String>, labels: Vec<i32>) -> HashMap<Pair, i32> 
     }
     freqs
 }
-
-// pub fn all_tweets() -> Vec<String> {
-//     let path_positive = "datasets/twitter_samples/positive_tweets.json";
-//     let path_negative = "datasets/twitter_samples/negative_tweets.json";
-//     read_tweets(path_positive).append(&mut read_tweets(path_negative))
-// }
