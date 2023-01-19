@@ -153,12 +153,12 @@ pub fn stopwords<'life>(lang:&str) -> Vec<String> {
 /// Output:
 ///     freqs: a dictionary mapping each (word, sentiment) pair to its
 ///     frequency
-pub fn build_freqs(tweets: Vec<String>, labels: Vec<i32>) -> HashMap<Pair, i32> {
+pub fn build_freqs(tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<Pair, i32> {
     let mut freqs: HashMap<Pair, i32> = HashMap::new();
     for (label, tweet) in zip(labels, tweets) {
-        let tokens = process_tweet(tweet.as_ref(), true, true, true);
+        let tokens = process_tweet(tweet, true, true, true);
         for word in tokens {
-            let pair = Pair(word, label);
+            let pair = Pair(word, *label);
             freqs.entry(pair).and_modify(|v| *v += 1).or_insert(1);
         }
     }
@@ -169,20 +169,21 @@ pub fn build_freqs(tweets: Vec<String>, labels: Vec<i32>) -> HashMap<Pair, i32> 
 ///     freqs: a dictionary corresponding to the frequencies of each tuple (word, label)
 /// Output: 
 ///     a feature vector of dimension (1,3)
-pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Array2<f32> {
+pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Vec<f32> {
     // process_tweet tokenizes, stems, and removes stopwords
     let word_list = process_tweet(tweet, true, true, true);
     // 3 elements in the form of a 1 x 3 vector
-    let mut feature: Array2<f32> = Array2::zeros((1, 3));
+    let mut feature = vec![0.; 3];
+    //let mut _feature: Array2<f32> = Array2::zeros((1, 3));
     // bias term is set to 1
-    feature[[0, 0]] = 1.;
+    feature[0] = 1.;
 
     for word in word_list {
         // increment the word count for the positive label 1
-        feature[[0, 1]] += freqs[&Pair(word.clone(), 1)] as f32;
+        feature[1] += freqs[&Pair(word.clone(), 1)] as f32;
         // increment the word count for the positive label 0
-        feature[[0, 2]] += freqs[&Pair(word, 1)] as f32;
+        feature[2] += freqs[&Pair(word, 1)] as f32;
     }
-    assert!(feature.shape() == [1, 3]);
+    assert!(feature.len() == 3);
     feature
 }
