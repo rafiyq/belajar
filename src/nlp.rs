@@ -3,8 +3,7 @@ use html_escape::decode_html_entities;
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
-use crate::stem;
-extern crate blas_src;
+use crate::{stem, FType};
 
 macro_rules! fc_regex {
     ($re:expr) => {
@@ -168,7 +167,7 @@ pub fn build_freqs(tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<Pair, i32
 ///     freqs: a dictionary corresponding to the frequencies of each tuple (word, label)
 /// Output: 
 ///     a feature vector of dimension (1,3)
-pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Vec<f64> {
+pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Vec<FType> {
     // process_tweet tokenizes, stems, and removes stopwords
     let word_list = process_tweet(tweet, true, true, true);
     // 3 elements in the form of a 1 x 3 vector
@@ -180,7 +179,7 @@ pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Vec<f64> {
         for (i, k) in [Pair(word.clone(), 1), Pair(word, 0)].iter().enumerate() {
             match freqs.get(k) {
                 // increment the word count
-                Some(score) => feature[i] += *score as f64,
+                Some(score) => feature[i] += *score as FType,
                 None => ()
             }
         }

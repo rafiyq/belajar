@@ -1,4 +1,7 @@
 use ndarray::Array2;
+use crate::FType;
+
+extern crate blas_src;
 
 /// ```text
 ///                 1
@@ -9,6 +12,6 @@ use ndarray::Array2;
 ///     z: is the input (can be a scalar or an array)
 /// Output:
 ///     z with the sigmoid implemented
-pub fn sigmoid(z: Array2<f32>) -> Array2<f32> {
-    1. / (1. + (-z).mapv(f32::exp))
+pub fn sigmoid(z: Array2<FType>) -> Array2<FType> {
+    1. / (1. + (-z).mapv(FType::exp))
 }
