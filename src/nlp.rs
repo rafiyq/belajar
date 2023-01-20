@@ -1,9 +1,10 @@
 use std::{fmt, fs, collections::HashMap, iter::zip};
 use html_escape::decode_html_entities;
+use ndarray::{Array2};
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
-use crate::{stem, FType};
+use crate::{stem, FType, activation::sigmoid};
 
 macro_rules! fc_regex {
     ($re:expr) => {
@@ -167,23 +168,54 @@ pub fn build_freqs(tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<Pair, i32
 ///     freqs: a dictionary corresponding to the frequencies of each tuple (word, label)
 /// Output: 
 ///     a feature vector of dimension (1,3)
-pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Vec<FType> {
+pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Array2<FType> {
     // process_tweet tokenizes, stems, and removes stopwords
     let word_list = process_tweet(tweet, true, true, true);
     // 3 elements in the form of a 1 x 3 vector
-    let mut feature = vec![0.; 3];
+    let mut feature: Array2<FType> = Array2::zeros((1, 3));
+    //let mut feature = vec![0.; 3];
     // bias term is set to 1
-    feature[0] = 1.;
+    feature[[0, 0]] = 1.;
 
     for word in word_list {
         for (i, k) in [Pair(word.clone(), 1), Pair(word, 0)].iter().enumerate() {
             match freqs.get(k) {
                 // increment the word count
-                Some(score) => feature[i] += *score as FType,
+                Some(score) => feature[[0, i]] += *score as FType,
                 None => ()
             }
         }
     }
-    assert!(feature.len() == 3);
+    assert!(feature.shape() == [1, 3]);
     feature
+}
+/// Input: 
+///     tweet: a string
+///     freqs: a dictionary corresponding to the frequencies of each tuple (word, label)
+///     theta: (3,1) vector of weights
+/// Output: 
+///     the probability of a tweet being positive or negative
+pub fn predict_tweet(tweet: &str, freqs: &HashMap<Pair, i32>, theta: &Array2<FType>) -> FType {
+    let feature = extract_features(tweet, freqs);
+    sigmoid(feature.dot(theta)).last().unwrap().to_owned()
+}
+/// Input: 
+///     test_x: a list of tweets
+///     test_y: (m, 1) vector with the corresponding labels for the list of tweets
+///     freqs: a dictionary with the frequency of each pair (or tuple)
+///     theta: weight vector of dimension (3, 1)
+/// Output: 
+///     accuracy: (# of tweets classified correctly) / (total # of tweets)
+pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &HashMap<Pair, i32>, theta: &Array2<FType>) -> FType {
+    let mut y_hat: Vec<i32> = Vec::new();
+    for tweet in test_x.iter() {
+        let prediction = predict_tweet(tweet, freqs, theta);
+        if prediction > 0.5 {
+            y_hat.push(1);
+        } else {
+            y_hat.push(0);
+        }
+    }
+    y_hat.iter().zip(&test_y).filter(|(a,b)| *a==*b).count() as f64 / test_x.len() as f64
+
 }
