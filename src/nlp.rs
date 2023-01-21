@@ -145,7 +145,11 @@ pub fn stopwords<'life>(lang:&str) -> Vec<String> {
 /// Output:
 ///     freqs: a dictionary mapping each (word, sentiment) pair to its
 ///     frequency
-pub fn build_freqs(mut freqs: HashMap<(String, i32), i32>, tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<(String, i32), i32> {
+pub fn build_freqs(
+    mut freqs: HashMap<(String, i32), i32>, 
+    tweets: &Vec<String>, 
+    labels: &Vec<i32>
+) -> HashMap<(String, i32), i32> {
     for (label, tweet) in zip(labels, tweets) {
         let tokens = process_tweet(tweet, true, true, true);
         for word in tokens {
@@ -198,7 +202,12 @@ pub fn predict_tweet(tweet: &str, freqs: &HashMap<(String, i32), i32>, theta: &A
 ///     theta: weight vector of dimension (3, 1)
 /// Output: 
 ///     accuracy: (# of tweets classified correctly) / (total # of tweets)
-pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &HashMap<(String, i32), i32>, theta: &Array2<FType>) -> FType {
+pub fn test_logistic_regression(
+    test_x: Vec<String>, 
+    test_y: Vec<i32>, 
+    freqs: &HashMap<(String, i32), i32>, 
+    theta: &Array2<FType>
+) -> FType {
     let mut y_hat: Vec<i32> = Vec::new();
     for tweet in test_x.iter() {
         let prediction = predict_tweet(tweet, freqs, theta);
@@ -209,10 +218,9 @@ pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &H
         }
     }
     y_hat.iter().zip(&test_y).filter(|(a,b)| *a==*b).count() as f64 / test_x.len() as f64
-
 }
 /// Return train_x, train_y, test_x, test_y datasets from twitter_samples
-pub fn tweeter_datasets() -> (Vec<String>, Vec<i32>, Vec<String>, Vec<i32>) {
+pub fn twitter_datasets() -> (Vec<String>, Vec<i32>, Vec<String>, Vec<i32>) {
     let mut all_positive_tweets = read_tweets("datasets/twitter_samples/positive_tweets.json");
     let mut all_negative_tweets = read_tweets("datasets/twitter_samples/negative_tweets.json");
     let test_x = [all_positive_tweets.split_off(4000), all_negative_tweets.split_off(4000)].concat();
