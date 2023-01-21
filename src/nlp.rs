@@ -11,14 +11,6 @@ macro_rules! fc_regex {
         ::fancy_regex::Regex::new($re).unwrap()
     };
 }
-#[derive(Eq, Hash, PartialEq)]
-pub struct Pair(String, i32);
-impl fmt::Display for Pair {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({:?}, {})", &self.0, &self.1)?;
-        Ok(())
-    }
-}
 
 pub fn read_tweets(path:&str) -> Vec<String> {
     let mut tweets:Vec<String> = Vec::new();
