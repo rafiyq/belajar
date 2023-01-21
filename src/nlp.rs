@@ -211,3 +211,13 @@ pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &H
     y_hat.iter().zip(&test_y).filter(|(a,b)| *a==*b).count() as f64 / test_x.len() as f64
 
 }
+/// Return train_x, train_y, test_x, test_y datasets from twitter_samples
+pub fn tweeter_datasets() -> (Vec<String>, Vec<i32>, Vec<String>, Vec<i32>) {
+    let mut all_positive_tweets = read_tweets("datasets/twitter_samples/positive_tweets.json");
+    let mut all_negative_tweets = read_tweets("datasets/twitter_samples/negative_tweets.json");
+    let test_x = [all_positive_tweets.split_off(4000), all_negative_tweets.split_off(4000)].concat();
+    let train_x = [all_positive_tweets, all_negative_tweets].concat();
+    let train_y = [vec![1; 4000], vec![0; 4000]].concat();
+    let test_y = [vec![1; 1000], vec![0; 1000]].concat();
+    (train_x, train_y, test_x, test_y)
+}
