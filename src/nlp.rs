@@ -1,4 +1,4 @@
-use std::{fs, collections::HashMap, iter::zip};
+use std::{fs, collections::{HashMap, HashSet}, iter::zip};
 use html_escape::decode_html_entities;
 use ndarray::Array2;
 use serde_json::Value;
@@ -228,4 +228,41 @@ pub fn twitter_datasets() -> (Vec<String>, Vec<i32>, Vec<String>, Vec<i32>) {
     let train_y = [vec![1; 4000], vec![0; 4000]].concat();
     let test_y = [vec![1; 1000], vec![0; 1000]].concat();
     (train_x, train_y, test_x, test_y)
+}
+/// Input:
+///     freqs: dictionary from (word, label) to how often the word appears
+///     texts: a list of text
+///     labels: a list of labels correponding to the text (0,1)
+/// Output:
+///     logprior: the log prior.
+///     loglikelihood: the log likelihood of you Naive bayes equation.
+pub fn train_naive_bayes(freqs: &HashMap<(String, i32), i32>, labels: Vec<i32>) -> (FType, HashMap<String, FType>) {
+    let mut loglikelihood: HashMap<String, FType> = HashMap::new();
+    let mut vocab: HashSet<String> = HashSet::new();
+    let mut total_word_pos: FType = 0. ;
+    let mut total_word_neg: FType = 0. ;
+    for pair in freqs.keys() {
+        let (word, label) = pair;
+        vocab.insert(word.to_string());
+        if *label > 0 {
+            total_word_pos += *freqs.get(pair).unwrap() as FType;
+        } else {
+            total_word_neg += *freqs.get(pair).unwrap() as FType;
+        }
+    }
+    let total_uniq_word = vocab.len() as FType;
+    let mut text_pos: FType = 0. ;
+    let mut text_neg: FType = 0. ;
+    for label in labels {
+        if label == 1 { text_pos += 1. } else { text_neg += 1. }
+    }
+    let logprior = text_pos.ln() - text_neg.ln();
+    for word in vocab {
+        let freq_word_pos = freqs.get(&(word.clone(), 1)).or(Some(&0)).unwrap();
+        let freq_word_neg = freqs.get(&(word.clone(), 1)).or(Some(&0)).unwrap();
+        let prob_word_pos = (freq_word_pos + 1) as FType / (total_word_pos + total_uniq_word);
+        let prob_word_neg = (freq_word_neg + 1) as FType / (total_word_neg + total_uniq_word);
+        loglikelihood.insert(word, (prob_word_pos/prob_word_neg).ln());
+    }
+    (logprior, loglikelihood)
 }
