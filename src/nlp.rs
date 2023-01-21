@@ -160,7 +160,7 @@ pub fn build_freqs(mut freqs: HashMap<(String, i32), i32>, tweets: &Vec<String>,
 ///     freqs: a dictionary corresponding to the frequencies of each tuple (word, label)
 /// Output: 
 ///     a feature vector of dimension (1,3)
-pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Array2<FType> {
+pub fn extract_features(tweet: &str, freqs: &HashMap<(String, i32), i32>) -> Array2<FType> {
     // process_tweet tokenizes, stems, and removes stopwords
     let word_list = process_tweet(tweet, true, true, true);
     // 3 elements in the form of a 1 x 3 vector
@@ -170,7 +170,7 @@ pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Array2<FType
     feature[[0, 0]] = 1.;
 
     for word in word_list {
-        for (i, k) in [Pair(word.clone(), 1), Pair(word, 0)].iter().enumerate() {
+        for (i, k) in [(word.clone(), 1), (word, 0)].iter().enumerate() {
             match freqs.get(k) {
                 // increment the word count
                 Some(score) => feature[[0, i]] += *score as FType,
@@ -187,7 +187,7 @@ pub fn extract_features(tweet: &str, freqs: &HashMap<Pair, i32>) -> Array2<FType
 ///     theta: (3,1) vector of weights
 /// Output: 
 ///     the probability of a tweet being positive or negative
-pub fn predict_tweet(tweet: &str, freqs: &HashMap<Pair, i32>, theta: &Array2<FType>) -> FType {
+pub fn predict_tweet(tweet: &str, freqs: &HashMap<(String, i32), i32>, theta: &Array2<FType>) -> FType {
     let feature = extract_features(tweet, freqs);
     sigmoid(feature.dot(theta)).last().unwrap().to_owned()
 }
@@ -198,7 +198,7 @@ pub fn predict_tweet(tweet: &str, freqs: &HashMap<Pair, i32>, theta: &Array2<FTy
 ///     theta: weight vector of dimension (3, 1)
 /// Output: 
 ///     accuracy: (# of tweets classified correctly) / (total # of tweets)
-pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &HashMap<Pair, i32>, theta: &Array2<FType>) -> FType {
+pub fn test_logistic_regression(test_x: Vec<String>, test_y: Vec<i32>, freqs: &HashMap<(String, i32), i32>, theta: &Array2<FType>) -> FType {
     let mut y_hat: Vec<i32> = Vec::new();
     for tweet in test_x.iter() {
         let prediction = predict_tweet(tweet, freqs, theta);
