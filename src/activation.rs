@@ -1,8 +1,6 @@
 use ndarray::Array2;
 use crate::FType;
 
-extern crate blas_src;
-
 /// ```text
 ///                 1
 /// sigmoid(z) = ――――――――

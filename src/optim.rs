@@ -1,8 +1,6 @@
 use ndarray::Array2;
 use crate::{activation::sigmoid, loss::binary_cross_entropy, FType};
 
-extern crate blas_src;
-
 /// Input:
 ///     x: matrix of features which is (m,n+1)
 ///     y: corresponding labels of the input matrix x, dimensions (m,1)
