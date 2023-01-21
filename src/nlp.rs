@@ -1,6 +1,6 @@
-use std::{fmt, fs, collections::HashMap, iter::zip};
+use std::{fs, collections::HashMap, iter::zip};
 use html_escape::decode_html_entities;
-use ndarray::{Array2};
+use ndarray::Array2;
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
