@@ -138,18 +138,18 @@ pub fn stopwords<'life>(lang:&str) -> Vec<String> {
 }
 /// Build frequencies.
 /// Input:
+///     freqs: a dictionary that will be used to map each pair to its frequency
 ///     tweets: a list of tweets
 ///     label: an m x 1 array with the sentiment label of each tweet
 ///     (either 0 or 1)
 /// Output:
 ///     freqs: a dictionary mapping each (word, sentiment) pair to its
 ///     frequency
-pub fn build_freqs(tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<Pair, i32> {
-    let mut freqs: HashMap<Pair, i32> = HashMap::new();
+pub fn build_freqs(mut freqs: HashMap<(String, i32), i32>, tweets: &Vec<String>, labels: &Vec<i32>) -> HashMap<(String, i32), i32> {
     for (label, tweet) in zip(labels, tweets) {
         let tokens = process_tweet(tweet, true, true, true);
         for word in tokens {
-            let pair = Pair(word, *label);
+            let pair = (word, *label);
             freqs.entry(pair).and_modify(|v| *v += 1).or_insert(1);
         }
     }
