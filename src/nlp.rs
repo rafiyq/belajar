@@ -297,3 +297,18 @@ pub fn test_naive_bayes(texts: Vec<String>, labels: Vec<i32>, logprior: &FType, 
     }
     1. - (predictions - labels_vec).mapv(FType::abs).mean().unwrap()
 }
+/// Input:
+///     freqs: dictionary containing the words 
+/// Output: 
+///     a dictionary with keys 'positive', 'negative', and 'ratio'.
+///     Example: {'positive': 10, 'negative': 20, 'ratio': 0.5}
+pub fn get_ratio(freqs: &HashMap<(String, i32), i32>, word: &str) -> HashMap<String, FType>{
+    let positive = freqs.get(&(word.to_string(), 1)).or(Some(&0)).unwrap().to_owned() as FType;
+    let negative = freqs.get(&(word.to_string(), 0)).or(Some(&0)).unwrap().to_owned() as FType;
+    let ratio = positive / negative;
+    HashMap::from([
+        ("positive".to_string(), positive),
+        ("negative".to_string(), negative),
+        ("ratio".to_string(), ratio),
+    ])
+}
