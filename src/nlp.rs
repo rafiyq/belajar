@@ -1,6 +1,6 @@
 use std::{fs, collections::{HashMap, HashSet}, iter::zip};
 use html_escape::decode_html_entities;
-use ndarray::Array2;
+use ndarray::{Array2, array, Array, Axis};
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -217,7 +217,7 @@ pub fn test_logistic_regression(
             y_hat.push(0);
         }
     }
-    y_hat.iter().zip(&test_y).filter(|(a,b)| *a==*b).count() as f64 / test_x.len() as f64
+    y_hat.iter().zip(&test_y).filter(|(a,b)| *a==*b).count() as FType / test_x.len() as FType
 }
 /// Return train_x, train_y, test_x, test_y datasets from twitter_samples
 pub fn twitter_datasets() -> (Vec<String>, Vec<i32>, Vec<String>, Vec<i32>) {
