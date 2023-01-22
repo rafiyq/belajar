@@ -259,11 +259,41 @@ pub fn train_naive_bayes(freqs: &HashMap<(String, i32), i32>, labels: Vec<i32>) 
     let logprior = text_pos.ln() - text_neg.ln();
     for word in vocab {
         let freq_word_pos = freqs.get(&(word.clone(), 1)).or(Some(&0)).unwrap();
-        let freq_word_neg = freqs.get(&(word.clone(), 1)).or(Some(&0)).unwrap();
+        let freq_word_neg = freqs.get(&(word.clone(), 0)).or(Some(&0)).unwrap();
         let prob_word_pos = (freq_word_pos + 1) as FType / (total_word_pos + total_uniq_word);
         let prob_word_neg = (freq_word_neg + 1) as FType / (total_word_neg + total_uniq_word);
         loglikelihood.insert(word, (prob_word_pos/prob_word_neg).ln());
     }
     (logprior, loglikelihood)
 }
+/// Input:
+///     text: a string
+///     logprior: a number
+///     loglikelihood: a dictionary of words mapping to numbers
+/// Output:
+///     the sum of all the logliklihoods of each word in the tweet (if found in the dictionary) + logprior (a number)
+pub fn naive_bayes_predict(text: &str, logprior: &FType, loglikelihood: &HashMap<String, FType>) -> FType {
+    let word_list = process_tweet(text, true, true, true);
+    let mut sum = *logprior;
+    for word in word_list {
+        if loglikelihood.contains_key(&word) { sum += loglikelihood.get(&word).unwrap()}
     }
+    sum
+}
+/// Input:
+///     test_x: A list of tweets
+///     test_y: the corresponding labels for the list of tweets
+///     logprior: the logprior
+///     loglikelihood: a dictionary with the loglikelihoods for each word
+/// Output:
+///     accuracy (# of tweets classified correctly)/(total # of tweets)
+pub fn test_naive_bayes(texts: Vec<String>, labels: Vec<i32>, logprior: &FType, loglikelihood: &HashMap<String, FType>) -> FType {
+    let labels_vec: Array2<FType>= Array::from_vec(labels).mapv(|x| x as FType).insert_axis(Axis(1));
+    let mut predictions = Array2::<FType>::zeros((0, 1));
+    for text in texts {
+        if naive_bayes_predict(&text, logprior, loglikelihood) > 0. {
+            predictions.push_row(array![1.].view()).unwrap();
+        } else { predictions.push_row(array![0.].view()).unwrap() }
+    }
+    1. - (predictions - labels_vec).mapv(FType::abs).mean().unwrap()
+}
