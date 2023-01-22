@@ -287,8 +287,8 @@ pub fn naive_bayes_predict(text: &str, logprior: &FType, loglikelihood: &HashMap
 ///     loglikelihood: a dictionary with the loglikelihoods for each word
 /// Output:
 ///     accuracy (# of tweets classified correctly)/(total # of tweets)
-pub fn test_naive_bayes(texts: Vec<String>, labels: Vec<i32>, logprior: &FType, loglikelihood: &HashMap<String, FType>) -> FType {
-    let labels_vec: Array2<FType>= Array::from_vec(labels).mapv(|x| x as FType).insert_axis(Axis(1));
+pub fn test_naive_bayes(texts: &Vec<String>, labels: &Vec<i32>, logprior: &FType, loglikelihood: &HashMap<String, FType>) -> FType {
+    let labels_vec: Array2<FType>= Array::from_vec(labels.to_owned()).mapv(|x| x as FType).insert_axis(Axis(1));
     let mut predictions = Array2::<FType>::zeros((0, 1));
     for text in texts {
         if naive_bayes_predict(&text, logprior, loglikelihood) > 0. {
@@ -305,10 +305,33 @@ pub fn test_naive_bayes(texts: Vec<String>, labels: Vec<i32>, logprior: &FType, 
 pub fn get_ratio(freqs: &HashMap<(String, i32), i32>, word: &str) -> HashMap<String, FType>{
     let positive = freqs.get(&(word.to_string(), 1)).or(Some(&0)).unwrap().to_owned() as FType;
     let negative = freqs.get(&(word.to_string(), 0)).or(Some(&0)).unwrap().to_owned() as FType;
-    let ratio = positive / negative;
+    let ratio = (positive + 1.) / (negative + 1.);
     HashMap::from([
         ("positive".to_string(), positive),
         ("negative".to_string(), negative),
         ("ratio".to_string(), ratio),
     ])
+}
+/// Input:
+///     freqs: dictionary of words
+///     label: 1 for positive, 0 for negative
+///     threshold: ratio that will be used as the cutoff for including a word in the returned dictionary
+/// Output:
+///     dictionary containing the word and information on its positive count, negative count, and ratio of positive to negative counts.
+///     example of a key value pair:
+///     {'happi':
+///         {'positive': 10, 'negative': 20, 'ratio': 0.5}
+///     }
+pub fn get_word_by_treshold(freqs: &HashMap<(String, i32), i32>, label: i32, threshold: FType) -> HashMap<String, HashMap<String, FType>> {
+    let mut word_list: HashMap<String, HashMap<String, FType>> = HashMap::new();
+    for key in freqs.keys() {
+        let (word, _) = key;
+        let pos_neg_ratio = get_ratio(freqs, word);
+        if label == 1 && pos_neg_ratio.get("ratio").unwrap() >= &threshold { 
+            word_list.insert(word.to_string(), pos_neg_ratio);
+        } else if label == 0 && pos_neg_ratio.get("ratio").unwrap() <= &threshold {
+            word_list.insert(word.to_string(), pos_neg_ratio);
+        }
+    }
+    word_list
 }
