@@ -266,3 +266,4 @@ pub fn train_naive_bayes(freqs: &HashMap<(String, i32), i32>, labels: Vec<i32>) 
     }
     (logprior, loglikelihood)
 }
+    }
