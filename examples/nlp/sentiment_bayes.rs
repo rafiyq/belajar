@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use belajar::nlp::{twitter_datasets, build_freqs, train_naive_bayes, naive_bayes_predict, test_naive_bayes, get_ratio, get_word_by_treshold, process_tweet};
+use belajar::nlp::nlp::{twitter_datasets, build_freqs, train_naive_bayes, naive_bayes_predict, test_naive_bayes, get_ratio, get_word_by_treshold, process_tweet};
 
 fn main() {
     let (train_x, train_y, test_x, test_y) = twitter_datasets();

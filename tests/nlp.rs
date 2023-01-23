@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use belajar::nlp::{process_tweet, build_freqs};
+use belajar::nlp::nlp::{process_tweet, build_freqs};
 
 macro_rules! str {
     ($s:expr) => {

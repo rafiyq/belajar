@@ -1,5 +1,5 @@
 use std::{vec, time::Instant};
-use belajar::{nlp::{read_tweets, build_freqs, extract_features, test_logistic_regression, predict_tweet}, optim::gradient_descent, FType};
+use belajar::nlp::{nlp::{read_tweets, build_freqs, extract_features, test_logistic_regression, predict_tweet}, optim::gradient_descent, FType};
 use ndarray::{Array2, Array, Axis};
 
 fn main() {
