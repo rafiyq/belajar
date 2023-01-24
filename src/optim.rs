@@ -1,5 +1,5 @@
 use ndarray::Array2;
-use crate::{activation::sigmoid, loss::binary_cross_entropy, FType};
+use crate::{func::activation::sigmoid, func::loss::binary_cross_entropy, FType};
 
 /// Input:
 ///     x: matrix of features which is (m,n+1)

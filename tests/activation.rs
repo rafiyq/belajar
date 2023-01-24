@@ -1,4 +1,4 @@
-use belajar::{activation::sigmoid, FType};
+use belajar::{func::activation::sigmoid, FType};
 use ndarray::array;
 
 #[test]

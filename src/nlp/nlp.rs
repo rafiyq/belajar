@@ -4,7 +4,7 @@ use ndarray::{Array2, array, Array, Axis};
 use serde_json::Value;
 use lazy_static::lazy_static;
 use regex::Regex;
-use crate::{FType, activation::sigmoid};
+use crate::{FType, func::activation::sigmoid};
 
 macro_rules! fc_regex {
     ($re:expr) => {
