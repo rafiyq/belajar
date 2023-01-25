@@ -1,10 +1,11 @@
 use std::io::{BufReader, BufRead};
 use std::fs::File;
 use std::collections::{BTreeMap, HashSet};
-use ndarray::{Array, Array1};
+use ndarray::{Array, Array1, Array2, Axis};
+use ndarray_linalg::{UPLO, Eigh};
 
 use crate::FType;
-use crate::func::linalg::cosine_similarity;
+use crate::func::linalg::{cosine_similarity, covariance};
 
 pub fn load_embeddings_subset() -> BTreeMap<String, Array1<FType>> {
     let file_path = "datasets/GoogleNews/list_word_embeddings_subset.pickle";
@@ -70,3 +71,16 @@ pub fn get_accuracy(word_embeddings: &BTreeMap<String, Array1<FType>>, filepath:
     }
     num_correct as FType / m as FType
 } 
+/// TODO: Implement PCA
+/// Input:
+///     x: of dimension (m,n) where each row corresponds to a word vector
+///     n_components: Number of components you want to keep.
+/// Output:
+///     X_reduced: data transformed in 2 dims/columns + regenerated original data
+///     pass in: data as 2D NumPy array
+pub fn compute_pca(x: &Array2<FType>, _n_components: i32) -> Array2<FType>{
+    let x_demeaned = x - x.mean_axis(Axis(0)).unwrap();
+    let covariance_matrix = covariance(x_demeaned.clone(), false);
+    let (_eigen_vals, _eigen_vecs) = covariance_matrix.eigh(UPLO::Upper).unwrap();
+    x_demeaned
+}
