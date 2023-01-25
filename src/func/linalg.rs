@@ -7,7 +7,7 @@ use crate::FType;
 ///     b: another vector 
 /// Output:
 ///     numerical number representing the cosine similarity between a and b.
-pub fn cosine_similarity_vec(a: &Array1<FType>, b: &Array1<FType>) -> FType {
+pub fn cosine_similarity(a: &Array1<FType>, b: &Array1<FType>) -> FType {
     a.dot(b) / (a.norm_l2() * b.norm_l2())
 }
 /// Input:
@@ -15,6 +15,6 @@ pub fn cosine_similarity_vec(a: &Array1<FType>, b: &Array1<FType>) -> FType {
 ///     b: another vector 
 /// Output:
 ///     umerical number representing the Euclidean distance between a and b.
-pub fn euclidean_vec(a: &Array1<FType>, b: &Array1<FType>) -> FType {
+pub fn euclidean(a: &Array1<FType>, b: &Array1<FType>) -> FType {
     (a-b).mapv(|f|f.powi(2)).sum().sqrt()
 }
